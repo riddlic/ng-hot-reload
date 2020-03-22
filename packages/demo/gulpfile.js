@@ -84,9 +84,15 @@ gulp.task('serve', gulp.series('clean', function() {
 
   // Watch changes to the source files, pipe through `ngHotReload.stream`
   // and then to "dist" folder.
-  return watch(sourceFiles)
-      .pipe(ngHotReload.stream({
-        includeClient: false,
-      }))
-      .pipe(gulp.dest('./dist'));
+  return gulp.watch(sourceFiles)
+      .on('change', file => {
+        console.log('change', file);
+        return gulp.src(file)
+            .pipe(sourcemaps.init())
+            .pipe(gulpIf(isJsSourceFile, iife()))
+            .pipe(ngHotReload.stream({
+              includeClient: false,
+            }))
+            .pipe(gulp.dest('./dist'));
+      });
 }));

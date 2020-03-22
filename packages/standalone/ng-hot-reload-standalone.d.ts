@@ -1,7 +1,15 @@
 /// <reference types="node" />
 import stream = require('stream');
+import SourceMap = require('source-map');
 
 type JavaScriptString = string;
+type WrapOptions = {
+  angular: JavaScriptString,
+  forceRefresh: boolean,
+  preserveState: boolean,
+  port: number,
+  prependCode?: null | undefined | string,
+}
 type Options = {
   /**
    * If true (default), the WebSocket server is
@@ -83,7 +91,11 @@ interface NgHotReloadStandalone {
    * this function automatically, so it's quite
    * rare that you'd need to call it yourself.
    */
-  wrap(path: string, file: string): string;
+  wrap(path: string, file: string, options: WrapOptions, sourceMap?: undefined | null): string;
+  wrap(path: string, file: string, options: WrapOptions, sourceMap: SourceMap.RawSourceMap): Promise<{
+    code: string,
+    map: SourceMap.RawSourceMap
+  }>;
 
   /**
    * Returns a stream transofrm that can be used

@@ -73,7 +73,7 @@ async function transform(source, map) {
   }
 
   const callback = this.async();
-  await sourceMap.SourceMapConsumer.with(map, null, async (consumer) => {
+  await sourceMap.SourceMapConsumer.with(map, null, (consumer) => {
     const node = sourceMap.SourceNode.fromStringWithSourceMap(source, consumer);
     node.prepend(topPart);
     node.add(bottomPart);

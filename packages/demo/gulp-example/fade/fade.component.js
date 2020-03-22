@@ -1,6 +1,10 @@
 class FadeController {
   constructor() {
     this.visible = false;
+    setTimeout(() => {
+      console.log('woop9');
+      debugger;
+    }, 2000);
   }
 }
 

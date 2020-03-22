@@ -41,6 +41,9 @@ const config = {
     'ng-hot-reload-core': {
       commonjs2: 'ng-hot-reload-core',
     },
+    'source-map': {
+      commonjs2: 'source-map',
+    },
   },
   resolve: {
     modules: [

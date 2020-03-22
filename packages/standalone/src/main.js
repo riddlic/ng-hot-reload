@@ -20,7 +20,11 @@ export default function ngHotReloadStandalone({
     preserveState,
     port,
   };
-  const wrap = (path, file) => wrapFile(path, file, wrapOptions);
+  const wrap = (path, file, prepend, sourceMap) => wrapFile(
+      path, file,
+      Object.assign({ prependCode: prepend }, wrapOptions),
+      sourceMap,
+  );
 
   let fileServer;
   function startServer() {
@@ -31,11 +35,10 @@ export default function ngHotReloadStandalone({
    * Reload changed file.
    * @param {string} path Path to the file.
    * @param {string} file File contents.
-   * @param {boolean=} [includeClient=false] If true, the standalone client
-   *      is appended to the output.
+   * @param {string | null | undefined} [sourceMap] Generated source map
    */
-  function reload(path, file) {
-    fileServer.reload(path, file);
+  function reload(path, file, sourceMap) {
+    fileServer.reload(path, file, sourceMap);
   }
 
   /**
@@ -78,20 +81,38 @@ export default function ngHotReloadStandalone({
         return;
       }
 
-      let contents = wrap(file.path, String(file.contents));
+      let prependCode;
       if (scriptFileReg.test(file.path) && includeClient && !clientIncluded) {
         clientIncluded = true;
-        contents = client + contents;
+        prependCode = client;
+      }
+      const contents = wrap(
+          file.path, String(file.contents),
+          prependCode,
+          file.sourceMap,
+      );
+
+      function done(result) {
+        if (fileServer) {
+          reload(file.path, result.code, result.map);
+        }
+
+        file.contents = file.isBuffer() ?
+          Buffer.from(result.code, enc) :
+          result.code;
+        if (result.map) {
+          file.sourceMap = result.map;
+        }
+
+        cb(null, file);
       }
 
-      if (fileServer) {
-        reload(file.path, contents);
+      // Result is a string if there was no source map, Promise otherwise.
+      if (typeof contents === 'string') {
+        done({ code: contents });
+      } else {
+        contents.then(done);
       }
-
-      file.contents = file.isBuffer() ?
-        Buffer.from(contents, enc) :
-        contents;
-      cb(null, file);
     });
   }
 
