@@ -184,6 +184,8 @@ const directiveProvider = moduleName => {
               // do their cleanup work.
               $timeout(() => $scope.$destroy());
 
+              console.log($element);
+              debugger;
               $compile($element)(scope);
             }
 
